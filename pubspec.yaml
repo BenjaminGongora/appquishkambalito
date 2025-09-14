@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   video_player: ^2.8.2
-  audioplayers: ^5.0.1
+  audioplayers: ^5.2.1  # Versión que usa onPlayerError
   just_audio: ^0.9.35
   chewie: ^1.5.0 
   flutter_radio_player: ^3.0.2

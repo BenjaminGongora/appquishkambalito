@@ -10,35 +10,75 @@ class AudioProvider with ChangeNotifier {
   bool get isPlaying => _isPlaying;
   String? get currentStreamUrl => _currentStreamUrl;
 
+  AudioProvider() {
+    // Escuchar los cambios de estado del reproductor
+    _audioPlayer.playerStateStream.listen((playerState) {
+      final wasPlaying = _isPlaying;
+      _isPlaying = playerState.playing;
+      
+      // Solo notificar si el estado cambió
+      if (wasPlaying != _isPlaying) {
+        notifyListeners();
+      }
+    });
+
+    // Escuchar errores
+    _audioPlayer.playbackEventStream.listen((event) {}, 
+      onError: (error) {
+        print("Error en audio: $error");
+        _isPlaying = false;
+        notifyListeners();
+      });
+  }
+
   Future<void> play(String streamUrl) async {
     try {
       _currentStreamUrl = streamUrl;
+      
+      if (_audioPlayer.playing) {
+        await _audioPlayer.stop();
+      }
+      
       await _audioPlayer.setUrl(streamUrl);
       await _audioPlayer.play();
-      _isPlaying = true;
-      notifyListeners();
+      // _isPlaying se actualizará automáticamente por el listener
+      
     } catch (e) {
       print("Error playing audio: $e");
+      _isPlaying = false;
+      notifyListeners();
     }
   }
 
   Future<void> pause() async {
     try {
       await _audioPlayer.pause();
-      _isPlaying = false;
-      notifyListeners();
+      // _isPlaying se actualizará automáticamente por el listener
     } catch (e) {
       print("Error pausing audio: $e");
+      _isPlaying = false;
+      notifyListeners();
     }
   }
 
   Future<void> stop() async {
     try {
       await _audioPlayer.stop();
-      _isPlaying = false;
-      notifyListeners();
+      // _isPlaying se actualizará automáticamente por el listener
     } catch (e) {
       print("Error stopping audio: $e");
+      _isPlaying = false;
+      notifyListeners();
+    }
+  }
+
+  void togglePlayPause() {
+    if (_isPlaying) {
+      pause();
+    } else {
+      if (_currentStreamUrl != null) {
+        play(_currentStreamUrl!);
+      }
     }
   }
 

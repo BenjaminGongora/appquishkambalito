@@ -354,12 +354,10 @@ class RadioScreen extends StatelessWidget {
                                   color: AppColors.white,
                                 ),
                                 onPressed: () {
-                                  if (isPlaying) {
+                                  if (audioProvider.isPlaying) {
                                     audioProvider.pause();
                                   } else {
-                                    audioProvider.play(
-                                      'https://servidor26.brlogic.com:7652/live',
-                                    );
+                                    audioProvider.play('https://servidor26.brlogic.com:7652/live');
                                   }
                                 },
                               ),

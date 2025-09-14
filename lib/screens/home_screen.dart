@@ -272,8 +272,53 @@ class HomeScreen extends StatelessWidget {
                   _buildPremiumStatsSection(),
 
                   const SizedBox(height: 40),
+                  _buildAppFooter(),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Método del footer
+  Widget _buildAppFooter() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: AppColors.primaryBlue.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'v1.0.0', // Puedes usar AppConfig.version si configuras el archivo
+            style: TextStyle(
+              color: AppColors.greyText,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '© 2025 Radio Quishkambalito',
+            style: TextStyle(
+              color: AppColors.greyText.withOpacity(0.7),
+              fontSize: 11,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Todos los derechos reservados',
+            style: TextStyle(
+              color: AppColors.greyText.withOpacity(0.6),
+              fontSize: 10,
             ),
           ),
         ],
