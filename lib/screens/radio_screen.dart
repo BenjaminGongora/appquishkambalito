@@ -16,6 +16,7 @@ class RadioScreen extends StatelessWidget {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
+          // AppBar con gradiente y logo
           SliverAppBar(
             expandedHeight: 350,
             floating: false,
@@ -52,6 +53,13 @@ class RadioScreen extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
+                    // Efecto de ondas de radio
+                    Positioned.fill(
+                      child: Opacity(
+                        opacity: 0.1,
+                        child: CustomPaint(painter: _RadioWavesPainter()),
+                      ),
+                    ),
                     Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -83,6 +91,7 @@ class RadioScreen extends StatelessWidget {
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
+                                // Efecto de pulsación cuando está reproduciendo
                                 if (isPlaying)
                                   TweenAnimationBuilder(
                                     tween: Tween(begin: 0.0, end: 1.0),
@@ -139,6 +148,7 @@ class RadioScreen extends StatelessWidget {
             ),
           ),
 
+          // Contenido principal
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -222,6 +232,7 @@ class RadioScreen extends StatelessWidget {
                         // Barra de progreso elegante
                         Column(
                           children: [
+                            // Tiempo transcurrido
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -242,6 +253,7 @@ class RadioScreen extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 8),
+                            // Barra de progreso
                             Container(
                               height: 6,
                               decoration: BoxDecoration(
@@ -250,6 +262,7 @@ class RadioScreen extends StatelessWidget {
                               ),
                               child: Stack(
                                 children: [
+                                  // Progreso reproducido
                                   Container(
                                     height: 6,
                                     width:
@@ -266,6 +279,7 @@ class RadioScreen extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(3),
                                     ),
                                   ),
+                                  // Punto de control
                                   Positioned(
                                     left:
                                         MediaQuery.of(context).size.width *
@@ -296,17 +310,18 @@ class RadioScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 30),
 
-                        // Controles de reproducción - CORREGIDO
+                        // Controles de reproducción
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
+                            // Botón anterior
                             _buildControlButton(
                               Icons.skip_previous_rounded,
                               AppColors.greyText,
                               () {},
                             ),
 
-                            // Botón play/pause principal - USANDO togglePlayPause
+                            // Botón play/pause principal
                             Container(
                               width: 80,
                               height: 80,
@@ -339,11 +354,18 @@ class RadioScreen extends StatelessWidget {
                                   color: AppColors.white,
                                 ),
                                 onPressed: () {
-                                  audioProvider.togglePlayPause();
+                                  if (isPlaying) {
+                                    audioProvider.pause();
+                                  } else {
+                                    audioProvider.play(
+                                      'https://servidor26.brlogic.com:7652/live',
+                                    );
+                                  }
                                 },
                               ),
                             ),
 
+                            // Botón siguiente
                             _buildControlButton(
                               Icons.skip_next_rounded,
                               AppColors.greyText,
@@ -353,6 +375,7 @@ class RadioScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
 
+                        // Volumen y ajustes
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -379,6 +402,7 @@ class RadioScreen extends StatelessWidget {
 
                   const SizedBox(height: 30),
 
+                  // Información de la estación
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -411,6 +435,7 @@ class RadioScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        // Estadísticas
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -424,11 +449,7 @@ class RadioScreen extends StatelessWidget {
                               'Transmisión',
                               Icons.schedule_rounded,
                             ),
-                            _buildStatItem(
-                              'HD',
-                              'Calidad',
-                              Icons.schedule_rounded,
-                            ),
+                            // _buildStatItem('HD', 'Calidad', Icons.quality_rounded),
                           ],
                         ),
                       ],
@@ -502,4 +523,29 @@ class RadioScreen extends StatelessWidget {
       ],
     );
   }
+}
+
+// CustomPainter para efecto de ondas de radio
+class _RadioWavesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    final center = Offset(size.width / 2, size.height / 2);
+
+    for (int i = 1; i <= 5; i++) {
+      final radius = (size.width / 2) * (i / 5);
+      canvas.drawCircle(
+        center,
+        radius,
+        paint..color = Colors.white.withOpacity(0.1),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
