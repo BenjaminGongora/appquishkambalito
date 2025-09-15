@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:myapp/theme/colors.dart';
 import 'package:myapp/screens/radio_screen.dart';
 import 'package:myapp/screens/tv_screen.dart';
+import 'package:myapp/screens/live_chat_screen.dart';
 
 // Clase CustomPainter fuera del método build
 class _DotsPainter extends CustomPainter {
@@ -192,6 +193,16 @@ class HomeScreen extends StatelessWidget {
                         const TvScreen(),
                         'Canales en directo',
                         'lib/assets/tv_bg.png',
+                      ),
+
+                      _buildPremiumFeatureCard(
+                        context,
+                        'Chat en Vivo',
+                        Icons.chat_rounded,
+                        Colors.purpleAccent,
+                        const LiveChatScreen(),
+                        'Conversa en directo',
+                        'lib/assets/chat_bg.png',
                       ),
                       // _buildPremiumFeatureCard(
                       //   context,

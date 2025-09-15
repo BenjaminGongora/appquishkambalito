@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "659158041292",
+    "project_id": "appquishkambalito-chat",
+    "storage_bucket": "appquishkambalito-chat.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659158041292:android:118dd88d721590008f3869",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "659158041292-f9ht6q53u1f6i2jfghlt9l7ps570hh6h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtm5OXq8dxffDiNgSlUt5L5RKmdhSUPN4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "659158041292-f9ht6q53u1f6i2jfghlt9l7ps570hh6h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
