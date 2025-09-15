@@ -56,17 +56,27 @@ class ChatProvider with ChangeNotifier {
 
   Future<void> signInWithGoogle() async {
     try {
-      // Usar Firebase auth directamente con redirect
-      final GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
       if (kIsWeb) {
-        // Forzar redirect en web
-        await _auth.signInWithRedirect(googleProvider);
+        // Web usa redirect o popup
+        await _auth.signInWithPopup(GoogleAuthProvider());
       } else {
-        await _auth.signInWithPopup(googleProvider);
+        // Android / iOS usan GoogleSignIn
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) return; // usuario canceló
+
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        await _auth.signInWithCredential(credential);
       }
     } catch (error) {
       print('Error: $error');
+      _handleError(error, 'Error en Google Sign-In');
     }
   }
 
