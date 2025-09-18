@@ -56,30 +56,59 @@ class ChatProvider with ChangeNotifier {
 
   Future<void> signInWithGoogle() async {
     try {
+      print('🔧 Iniciando Google Sign-In...');
+
+      // Método alternativo que evita el error 10
+      final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+      googleProvider.addScope('email');
+      googleProvider.addScope('profile');
+
+      // Usar signInWithPopup o signInWithRedirect
       if (kIsWeb) {
-        // Web usa redirect o popup
-        await _auth.signInWithPopup(GoogleAuthProvider());
+        await _auth.signInWithPopup(googleProvider);
       } else {
-        // Android / iOS usan GoogleSignIn
-        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-        if (googleUser == null) return; // usuario canceló
-
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
-
-        final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-
-        await _auth.signInWithCredential(credential);
+        // Para Android, usar signInWithCredential con método alternativo
+        await _signInWithGoogleAndroid();
       }
+
     } catch (error) {
-      print('Error: $error');
-      _handleError(error, 'Error en Google Sign-In');
+      print('❌ Error Google Sign-In: $error');
+      // Mostrar error específico
+      if (error.toString().contains('ApiException: 10')) {
+        _error = 'Error de configuración. Verifica SHA-1 en Firebase Console.';
+      } else {
+        _error = 'Error al iniciar sesión: $error';
+      }
+      notifyListeners();
     }
   }
 
+  Future<void> _signInWithGoogleAndroid() async {
+    try {
+      // Método específico para Android
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+        signInOption: SignInOption.standard,
+      );
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return;
+
+      final GoogleSignInAuthentication googleAuth =
+      await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await _auth.signInWithCredential(credential);
+
+    } catch (error) {
+      print('❌ Error método Android: $error');
+      rethrow;
+    }
+  }
   Future<void> _signInWithGoogleWeb() async {
     try {
       // Intentar silent sign-in primero

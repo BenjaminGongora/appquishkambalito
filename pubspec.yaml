@@ -78,6 +78,9 @@ flutter:
     - lib/assets/
     - lib/assets/logoRadio.png
     - lib/assets/Chrome.png
+    - lib/assets/chachapoyas.jpg
+    - lib/assets/iquitos.jpg
+    - lib/assets/sleva.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

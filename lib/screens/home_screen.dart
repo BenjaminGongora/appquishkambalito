@@ -5,7 +5,6 @@ import 'package:myapp/screens/radio_screen.dart';
 import 'package:myapp/screens/tv_screen.dart';
 import 'package:myapp/screens/live_chat_screen.dart';
 
-// Clase CustomPainter fuera del método build
 class _DotsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -31,14 +30,17 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 600;
+    final gridCount = isWeb ? 3 : 1; // Cambiado a 1 columna en móvil para mejor visualización
+
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // AppBar con logo integrado
           SliverAppBar(
-            expandedHeight: 280,
+            expandedHeight: isWeb ? 220 : 200, // Más compacto en móvil
             floating: false,
             pinned: true,
             backgroundColor: Colors.transparent,
@@ -47,7 +49,7 @@ class HomeScreen extends StatelessWidget {
               title: Text(
                 'Radio y TV Quishkambalito',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: isWeb ? 18 : 16,
                   fontWeight: FontWeight.bold,
                   color: AppColors.white,
                   shadows: [
@@ -73,7 +75,6 @@ class HomeScreen extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
-                    // Efecto de partículas sutiles
                     Positioned.fill(
                       child: Opacity(
                         opacity: 0.05,
@@ -84,22 +85,16 @@ class HomeScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Logo de la radio
                           Container(
-                            width: 120,
-                            height: 120,
+                            width: isWeb ? 100 : 80, // Más pequeño en móvil
+                            height: isWeb ? 100 : 80,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
                                   color: AppColors.primaryBlue.withOpacity(0.4),
-                                  blurRadius: 25,
-                                  spreadRadius: 3,
-                                ),
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 4),
+                                  blurRadius: 20,
+                                  spreadRadius: 2,
                                 ),
                               ],
                             ),
@@ -119,9 +114,9 @@ class HomeScreen extends StatelessWidget {
                                         end: Alignment.bottomRight,
                                       ),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.live_tv_rounded,
-                                      size: 50,
+                                      size: isWeb ? 40 : 30,
                                       color: AppColors.white,
                                     ),
                                   );
@@ -129,24 +124,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          // Text(
-                          //   '',
-                          //   style: TextStyle(
-                          //     color: AppColors.white,
-                          //     fontSize: 18,
-                          //     fontWeight: FontWeight.w300,
-                          //     letterSpacing: 1.1,
-                          //   ),
-                          // ),
-                          const SizedBox(height: 4),
-                          // Text(
-                          //   'Disfruta de la mejor programación',
-                          //   style: TextStyle(
-                          //     color: AppColors.greyText,
-                          //     fontSize: 12,
-                          //   ),
-                          // ),
+                          const SizedBox(height: 12),
                         ],
                       ),
                     ),
@@ -156,119 +134,87 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Contenido principal
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(isWeb ? 30.0 : 16.0), // Menos padding en móvil
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Sección de acceso rápido
-                  // _buildSectionHeader('Acceso rápido'),
+                  // SECCIÓN PRINCIPAL MEJORADA PARA MÓVIL
+                  _buildSectionHeader('¿Qué quieres disfrutar hoy?'),
                   const SizedBox(height: 20),
 
-                  // Grid de opciones principales - DISEÑO MEJORADO
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                    childAspectRatio: 0.9,
-                    children: [
-                      _buildPremiumFeatureCard(
-                        context,
-                        'Radio en Vivo',
-                        Icons.radio_rounded,
-                        AppColors.accentOrange,
-                        const RadioScreen(),
-                        'Escucha en directo',
-                        'lib/assets/radio_bg.png',
-                      ),
-                      _buildPremiumFeatureCard(
-                        context,
-                        'TV en Vivo',
-                        Icons.live_tv_rounded,
-                        AppColors.primaryBlue,
-                        const TvScreen(),
-                        'Canales en directo',
-                        'lib/assets/tv_bg.png',
-                      ),
+                  // LISTA EN VEZ DE GRID PARA MÓVIL - Mucho mejor en celular
+                  isWeb ? _buildWebGrid(context) : _buildMobileList(context),
 
-                      _buildPremiumFeatureCard(
-                        context,
-                        'Chat en Vivo',
-                        Icons.chat_rounded,
-                        Colors.purpleAccent,
-                        const LiveChatScreen(),
-                        'Conversa en directo',
-                        'lib/assets/chat_bg.png',
-                      ),
-                      // _buildPremiumFeatureCard(
-                      //   context,
-                      //   'Programación',
-                      //   Icons.schedule_rounded,
-                      //   Colors.greenAccent,
-                      //   Container(),
-                      //   'Horarios',
-                      //   'lib/assets/schedule_bg.png',
-                      // ),
-                      // _buildPremiumFeatureCard(
-                      //   context,
-                      //   'Favoritos',
-                      //   Icons.favorite_rounded,
-                      //   Colors.pinkAccent,
-                      //   Container(),
-                      //   'Tus guardados',
-                      //   'lib/assets/favorites_bg.png',
-                      // ),
-                    ],
+                  const SizedBox(height: 24),
+
+                  // PRIMER ESPACIO PUBLICITARIO
+                  _buildModernAdSpaceWithImage(
+                    context,
+                    'Patrocinado por Quishkambalito',
+                    'Amazonas',
+                    'Ven y Disfruta',
+                    'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    Colors.redAccent,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // SEGUNDO ESPACIO PUBLICITARIO
+                  _buildModernAdSpaceWithImage(
+                    context,
+                    'Patrocinado por Quishkambalito',
+                    'Chachapoyas',
+                    'Ven y Disfruta',
+                    'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    Colors.blueAccent,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // TERCER ESPACIO PUBLICITARIO
+                  _buildModernAdSpaceWithImage(
+                    context,
+                    'Patrocinado por Quishkambalito',
+                    'Iquitos',
+                    'Ven y Disfruta',
+                    'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    Colors.orangeAccent,
                   ),
 
                   const SizedBox(height: 32),
 
-                  // Sección de canales destacados - DISEÑO MEJORADO
-                  _buildSectionHeader('Canales destacados', showViewAll: true),
+                  // Sección de canales destacados
+                  _buildSectionHeader('Canales populares', showViewAll: true),
                   const SizedBox(height: 16),
 
-                  // Lista horizontal de canales mejorada
                   SizedBox(
-                    height: 220,
+                    height: isWeb ? 250 : 200, // Más compacto en móvil
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
                       children: [
                         _buildPremiumChannelCard(
                           'Canal Principal',
-                          'Transmisión 24/7',
+                          '24/7 sin interrupciones',
                           Icons.live_tv_rounded,
                           AppColors.primaryBlue,
                           0.9,
-                          'lib/assets/channel1.png',
                         ),
                         _buildPremiumChannelCard(
                           'Radio FM',
-                          'Música sin parar',
+                          'Música sin comerciales',
                           Icons.radio_rounded,
                           AppColors.accentOrange,
                           0.8,
-                          'lib/assets/radio_wave.png',
                         ),
                         _buildPremiumChannelCard(
-                          'Eventos Especiales',
-                          'En vivo próximamente',
+                          'Eventos',
+                          'Conciertos en vivo',
                           Icons.event_rounded,
                           Colors.purpleAccent,
                           0.4,
-                          'lib/assets/events.png',
-                        ),
-                        _buildPremiumChannelCard(
-                          'Noticias',
-                          'Información al momento',
-                          Icons.newspaper_rounded,
-                          Colors.blueAccent,
-                          0.7,
-                          'lib/assets/news.png',
                         ),
                       ],
                     ),
@@ -276,11 +222,47 @@ class HomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 32),
 
-                  // Sección de estadísticas - DISEÑO MEJORADO
-                  _buildSectionHeader('En directo ahora'),
+                  // Sección de estadísticas
+                  _buildSectionHeader('Estadísticas en tiempo real'),
                   const SizedBox(height: 16),
 
                   _buildPremiumStatsSection(),
+
+                  const SizedBox(height: 32),
+
+                  // CUARTO ESPACIO PUBLICITARIO
+                  _buildModernAdSpaceWithImage(
+                    context,
+                    'Patrocinado por McDonald\'s',
+                    'Happy Meal',
+                    'Disfruta de nuestro menú infantil con juguete incluido',
+                    'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    Colors.yellowAccent,
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // QUINTO ESPACIO PUBLICITARIO
+                  _buildModernAdSpaceWithImage(
+                    context,
+                    'Patrocinado por Netflix',
+                    'Nuevos estrenos',
+                    'Miles de películas y series por solo \$9.99/mes',
+                    'https://images.unsplash.com/photo-1489599102910-59206b8ca314?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    Colors.redAccent,
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // SEXTO ESPACIO PUBLICITARIO
+                  _buildModernAdSpaceWithImage(
+                    context,
+                    'Patrocinado por Amazon',
+                    'Prime Day',
+                    'Ofertas exclusivas con envío gratis para miembros Prime',
+                    'https://images.unsplash.com/photo-1526947425960-945c6e72858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    Colors.blueAccent,
+                  ),
 
                   const SizedBox(height: 40),
                   _buildAppFooter(),
@@ -293,44 +275,418 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Método del footer
-  Widget _buildAppFooter() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: AppColors.primaryBlue.withOpacity(0.3),
-            width: 1,
+  // Widget para construir grid en web
+  Widget _buildWebGrid(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 20,
+      mainAxisSpacing: 20,
+      childAspectRatio: 0.85,
+      children: [
+        _buildEnhancedFeatureCard(
+          context,
+          'Radio en Vivo',
+          Icons.radio_rounded,
+          AppColors.accentOrange,
+          const RadioScreen(),
+          'Escucha nuestra programación en vivo las 24 horas',
+        ),
+        _buildEnhancedFeatureCard(
+          context,
+          'TV en Vivo',
+          Icons.live_tv_rounded,
+          AppColors.primaryBlue,
+          const TvScreen(),
+          'Disfruta de nuestros canales de televisión',
+        ),
+        _buildEnhancedFeatureCard(
+          context,
+          'Chat en Vivo',
+          Icons.chat_rounded,
+          Colors.purpleAccent,
+          const LiveChatScreen(),
+          'Únete a la conversación con otros oyentes',
+        ),
+      ],
+    );
+  }
+
+  // Widget para construir lista en móvil - MUCHO MEJOR para celular
+  Widget _buildMobileList(BuildContext context) {
+    return Column(
+      children: [
+        _buildMobileFeatureCard(
+          context,
+          'Radio en Vivo',
+          Icons.radio_rounded,
+          AppColors.accentOrange,
+          const RadioScreen(),
+          'Escucha programación 24/7',
+        ),
+        const SizedBox(height: 16),
+        _buildMobileFeatureCard(
+          context,
+          'TV en Vivo',
+          Icons.live_tv_rounded,
+          AppColors.primaryBlue,
+          const TvScreen(),
+          'Canales en directo',
+        ),
+        const SizedBox(height: 16),
+        _buildMobileFeatureCard(
+          context,
+          'Chat en Vivo',
+          Icons.chat_rounded,
+          Colors.purpleAccent,
+          const LiveChatScreen(),
+          'Conversa con la comunidad',
+        ),
+      ],
+    );
+  }
+
+  // NUEVO: Tarjeta optimizada para móvil
+  Widget _buildMobileFeatureCard(
+      BuildContext context,
+      String title,
+      IconData icon,
+      Color color,
+      Widget screen,
+      String description,
+      ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => screen),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                color.withOpacity(0.15),
+                color.withOpacity(0.05),
+              ],
+            ),
+            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+          ),
+          child: Row(
+            children: [
+              // Icono
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [color, color.withOpacity(0.7)],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, size: 28, color: Colors.white),
+              ),
+
+              const SizedBox(width: 16),
+
+              // Texto
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        color: AppColors.greyText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Flecha indicadora
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: color,
+                size: 20,
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  // NUEVO: Publicidad con imagen de demostración
+  Widget _buildModernAdSpaceWithImage(
+      BuildContext context,
+      String sponsorText,
+      String brandName,
+      String offer,
+      String imageUrl,
+      Color color,
+      ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showAdDetails(context, brandName),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: AppColors.cardDark,
+            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Imagen de demostración
+              Container(
+                height: 150,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                  image: DecorationImage(
+                    image: NetworkImage(imageUrl),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.7),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Patrocinado',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Contenido del anuncio
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sponsorText,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      brandName,
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      offer,
+                      style: TextStyle(
+                        color: AppColors.greyText,
+                        fontSize: 14,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Botón de acción
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _showAdDetails(context, brandName),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: color,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('Ver más información'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAdDetails(BuildContext context, String brand) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.cardDark,
+        title: Text(
+          'Oferta de $brand',
+          style: TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Este es un espacio publicitario demostrativo. '
+              'En una implementación real, aquí se mostrarían los detalles '
+              'completos de la promoción especial con imágenes y enlaces.',
+          style: TextStyle(color: AppColors.greyText),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Me interesa'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Resto de los métodos (mantenidos pero optimizados)
+  Widget _buildEnhancedFeatureCard(
+      BuildContext context,
+      String title,
+      IconData icon,
+      Color color,
+      Widget screen,
+      String description,
+      ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => screen)),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                color.withOpacity(0.15),
+                color.withOpacity(0.05),
+              ],
+            ),
+            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [color, color.withOpacity(0.7)]),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, size: 28, color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: TextStyle(
+                  color: AppColors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: TextStyle(
+                  color: AppColors.greyText,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppFooter() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.primaryBlue.withOpacity(0.3))),
       ),
       child: Column(
         children: [
           Text(
-            'v1.0.0', // Puedes usar AppConfig.version si configuras el archivo
-            style: TextStyle(
-              color: AppColors.greyText,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+            'v1.0.0',
+            style: TextStyle(color: AppColors.greyText, fontSize: 12),
           ),
           const SizedBox(height: 8),
           Text(
             '© 2025 Radio Quishkambalito',
-            style: TextStyle(
-              color: AppColors.greyText.withOpacity(0.7),
-              fontSize: 11,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Todos los derechos reservados',
-            style: TextStyle(
-              color: AppColors.greyText.withOpacity(0.6),
-              fontSize: 10,
-            ),
+            style: TextStyle(color: AppColors.greyText.withOpacity(0.7), fontSize: 11),
           ),
         ],
       ),
@@ -345,9 +701,8 @@ class HomeScreen extends StatelessWidget {
           title,
           style: TextStyle(
             color: AppColors.white,
-            fontSize: 22,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
-            letterSpacing: 0.8,
           ),
         ),
         if (showViewAll)
@@ -356,364 +711,95 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(
               color: AppColors.primaryBlue,
               fontSize: 14,
-              fontWeight: FontWeight.w500,
             ),
           ),
       ],
     );
   }
 
-  Widget _buildPremiumFeatureCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color,
-    Widget screen,
-    String subtitle,
-    String imagePath,
-  ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          if (screen is! Container) {
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => screen,
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0.0, 0.3),
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: FadeTransition(opacity: animation, child: child),
-                      );
-                    },
-              ),
-            );
-          }
-        },
-        borderRadius: BorderRadius.circular(25),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                color.withOpacity(0.25),
-                color.withOpacity(0.1),
-                Colors.transparent,
-              ],
-            ),
-            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              // Efecto de fondo sutil
-              Positioned.fill(
-                child: Opacity(
-                  opacity: 0.1,
-                  child: Image.asset(
-                    imagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container();
-                    },
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Icono principal
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            color.withOpacity(0.3),
-                            color.withOpacity(0.1),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(
-                          color: color.withOpacity(0.4),
-                          width: 2,
-                        ),
-                      ),
-                      child: Icon(icon, size: 28, color: color),
-                    ),
-
-                    // Contenido textual
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            color: AppColors.greyText,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Indicador de acción
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_rounded,
-                          color: color,
-                          size: 18,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildPremiumChannelCard(
-    String title,
-    String subtitle,
-    IconData icon,
-    Color color,
-    double progress,
-    String imagePath,
-  ) {
+      String title,
+      String subtitle,
+      IconData icon,
+      Color color,
+      double progress,
+      ) {
     return Container(
-      width: 180,
-      margin: const EdgeInsets.only(right: 20),
+      width: 160,
+      margin: const EdgeInsets.only(right: 15),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
           colors: [color.withOpacity(0.15), Colors.transparent],
         ),
         border: Border.all(color: color.withOpacity(0.25), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [color.withOpacity(0.3), color.withOpacity(0.1)]),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: color.withOpacity(0.4), width: 2),
+            ),
+            child: Icon(icon, size: 22, color: color),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: TextStyle(color: AppColors.greyText, fontSize: 11),
           ),
         ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Icono con fondo
-            Container(
-              width: 45,
-              height: 45,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [color.withOpacity(0.3), color.withOpacity(0.1)],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withOpacity(0.4), width: 2),
-              ),
-              child: Icon(icon, size: 24, color: color),
-            ),
-            const SizedBox(height: 15),
-
-            // Información del canal
-            Text(
-              title,
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: TextStyle(
-                color: AppColors.greyText,
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 15),
-
-            // Barra de progreso y estado
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: AppColors.greyText.withOpacity(0.2),
-                  color: color,
-                  borderRadius: BorderRadius.circular(3),
-                  minHeight: 4,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: progress > 0.5 ? Colors.green : Colors.orange,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${(progress * 100).toInt()}% en vivo',
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
 
   Widget _buildPremiumStatsSection() {
     return Container(
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
           colors: [AppColors.primaryBlue.withOpacity(0.1), AppColors.cardDark],
         ),
-        border: Border.all(
-          color: AppColors.primaryBlue.withOpacity(0.2),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2), width: 1.5),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(25),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildPremiumStatItem(
-              '1.2K',
-              'Oyentes activos',
-              Icons.people_rounded,
-              AppColors.primaryBlue,
-            ),
-            _buildPremiumStatItem(
-              '24/7',
-              'Transmisión',
-              Icons.online_prediction_rounded,
-              AppColors.accentOrange,
-            ),
-            _buildPremiumStatItem(
-              '15+',
-              'Canales HD',
-              Icons.live_tv_rounded,
-              Colors.greenAccent,
-            ),
-          ],
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildPremiumStatItem('1.2K', 'Oyentes activos', Icons.people_rounded, AppColors.primaryBlue),
+          _buildPremiumStatItem('24/7', 'Transmisión', Icons.online_prediction_rounded, AppColors.accentOrange),
+        ],
       ),
     );
   }
 
-  Widget _buildPremiumStatItem(
-    String value,
-    String label,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildPremiumStatItem(String value, String label, IconData icon, Color color) {
     return Column(
       children: [
-        // Icono con gradiente
         Container(
-          width: 55,
-          height: 55,
+          width: 50,
+          height: 50,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [color.withOpacity(0.3), color.withOpacity(0.1)],
-            ),
+            gradient: LinearGradient(colors: [color.withOpacity(0.3), color.withOpacity(0.1)]),
             shape: BoxShape.circle,
             border: Border.all(color: color.withOpacity(0.4), width: 2),
           ),
-          child: Icon(icon, size: 26, color: color),
+          child: Icon(icon, size: 24, color: color),
         ),
-        const SizedBox(height: 10),
-        Text(
-          value,
-          style: TextStyle(
-            color: color,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        const SizedBox(height: 8),
+        Text(value, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: AppColors.greyText,
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: TextAlign.center,
-        ),
+        Text(label, style: TextStyle(color: AppColors.greyText, fontSize: 11)),
       ],
     );
   }
