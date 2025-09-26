@@ -4,6 +4,8 @@ import 'package:myapp/providers/audio_provider.dart';
 import 'package:myapp/theme/colors.dart';
 import 'package:myapp/providers/chat_provider.dart';
 import '../models/chat_message.dart';
+import 'home_screen.dart'; // Importar HomeScreen para navegación
+import 'tv_screen.dart'; // Importar TvScreen para navegación
 
 class RadioScreen extends StatefulWidget {
   const RadioScreen({super.key});
@@ -14,6 +16,15 @@ class RadioScreen extends StatefulWidget {
 
 class _RadioScreenState extends State<RadioScreen> {
   bool _showChat = false;
+  int _currentIndex = 1; // Índice 1 para Radio (coincide con HomeScreen)
+
+  // Colores estilo red social
+  final Color _primaryColor = Color(0xFF0099FF);
+  final Color _secondaryColor = Color(0xFFFFD600);
+  final Color _backgroundColor = Color(0xFFF8F9FA);
+  final Color _cardColor = Colors.white;
+  final Color _textColor = Color(0xFF1C1E21);
+  final Color _greyText = Color(0xFF65676B);
 
   void _toggleChat() {
     setState(() {
@@ -21,58 +32,92 @@ class _RadioScreenState extends State<RadioScreen> {
     });
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+
+    // Navegar a las pantallas correspondientes
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+        break;
+      case 1:
+      // Ya estamos en RadioScreen
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => TvScreen()),
+        );
+        break;
+      case 3:
+      // Aquí iría la pantalla de Perfil (puedes crearla después)
+      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final audioProvider = Provider.of<AudioProvider>(context);
     final isPlaying = audioProvider.isPlaying;
+    final screenSize = MediaQuery.of(context).size;
+    final isDesktop = screenSize.width > 1024;
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: _backgroundColor,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // Header con gradiente y logo - ÚNICO AppBar
+          // Header moderno estilo red social
           SliverAppBar(
             title: Text(
-              'Radio en Vivo',
+              '',
               style: TextStyle(
-                color: AppColors.white,
-                fontSize: 18,
+                color: _textColor,
+                fontSize: isDesktop ? 20.0 : 18.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            backgroundColor: AppColors.accentOrange,
-            foregroundColor: AppColors.white,
+            backgroundColor: Colors.white,
+            foregroundColor: _textColor,
+            elevation: 1.0,
+            centerTitle: true,
             actions: [
               Container(
-                margin: const EdgeInsets.only(right: 16),
+                margin: EdgeInsets.only(right: isDesktop ? 20.0 : 16.0),
                 decoration: BoxDecoration(
-                  color: _showChat
-                      ? AppColors.primaryBlue
-                      : AppColors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  color: _showChat ? _primaryColor : _primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20.0),
                 ),
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: _toggleChat,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(20.0),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 20.0 : 16.0,
+                        vertical: isDesktop ? 10.0 : 8.0,
+                      ),
                       child: Row(
                         children: [
                           Icon(
-                            _showChat ? Icons.info_outline : Icons.chat_rounded,
-                            color: AppColors.white,
-                            size: 18,
+                            _showChat ? Icons.radio_rounded : Icons.chat_rounded,
+                            color: _showChat ? Colors.white : _primaryColor,
+                            size: isDesktop ? 20.0 : 18.0,
                           ),
-                          const SizedBox(width: 6),
+                          SizedBox(width: isDesktop ? 8.0 : 6.0),
                           Text(
-                            _showChat ? 'Info' : 'Chat',
+                            _showChat ? 'Radio' : 'Chat',
                             style: TextStyle(
-                              color: AppColors.white,
+                              color: _showChat ? Colors.white : _primaryColor,
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: isDesktop ? 16.0 : 14.0,
                             ),
                           ),
                         ],
@@ -82,10 +127,9 @@ class _RadioScreenState extends State<RadioScreen> {
                 ),
               ),
             ],
-            expandedHeight: 350,
+            expandedHeight: isDesktop ? 300.0 : 250.0,
             floating: false,
             pinned: true,
-            elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: BoxDecoration(
@@ -93,14 +137,15 @@ class _RadioScreenState extends State<RadioScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      AppColors.accentOrange.withOpacity(0.9),
-                      AppColors.darkBackground.withOpacity(0.8),
+                      _primaryColor.withOpacity(0.9),
+                      _primaryColor.withOpacity(0.7),
+                      _backgroundColor,
                     ],
                   ),
                 ),
                 child: Stack(
                   children: [
-                    // Efecto de ondas de radio
+                    // Efecto de ondas sutiles
                     Positioned.fill(
                       child: Opacity(
                         opacity: 0.1,
@@ -113,23 +158,20 @@ class _RadioScreenState extends State<RadioScreen> {
                         children: [
                           // Logo/Icono animado
                           Container(
-                            width: 140,
-                            height: 140,
+                            width: isDesktop ? 120.0 : 100.0,
+                            height: isDesktop ? 120.0 : 100.0,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [
-                                  AppColors.accentOrange,
-                                  AppColors.accentOrange.withOpacity(0.7),
-                                ],
+                                colors: [_primaryColor, _secondaryColor],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.accentOrange.withOpacity(0.5),
-                                  blurRadius: 30,
-                                  spreadRadius: 3,
+                                  color: _primaryColor.withOpacity(0.4),
+                                  blurRadius: 20.0,
+                                  spreadRadius: 3.0,
                                 ),
                               ],
                             ),
@@ -143,43 +185,42 @@ class _RadioScreenState extends State<RadioScreen> {
                                     duration: const Duration(seconds: 2),
                                     builder: (context, value, child) {
                                       return Container(
-                                        width: 140 * value,
-                                        height: 140 * value,
+                                        width: (isDesktop ? 120.0 : 100.0) * value,
+                                        height: (isDesktop ? 120.0 : 100.0) * value,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: AppColors.accentOrange
-                                                .withOpacity(0.3 - (value * 0.3)),
-                                            width: 2,
+                                            color: _primaryColor.withOpacity(0.3 - (value * 0.3)),
+                                            width: 2.0,
                                           ),
                                         ),
                                       );
                                     },
                                   ),
-                                const Icon(
+                                Icon(
                                   Icons.radio_rounded,
-                                  size: 60,
-                                  color: AppColors.white,
+                                  size: isDesktop ? 50.0 : 40.0,
+                                  color: Colors.white,
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: isDesktop ? 20.0 : 16.0),
                           Text(
                             'Radio Quishkambalito',
                             style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 24,
+                              color: Colors.white,
+                              fontSize: isDesktop ? 26.0 : 22.0,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8.0),
                           Text(
-                            'Transmitiendo en vivo',
+                            'Transmitiendo en vivo 24/7',
                             style: TextStyle(
-                              color: AppColors.greyText,
-                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: isDesktop ? 16.0 : 14.0,
                             ),
                           ),
                         ],
@@ -194,217 +235,237 @@ class _RadioScreenState extends State<RadioScreen> {
           // Contenido principal
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(isDesktop ? 32.0 : 24.0),
               child: Column(
                 children: [
-                  // Tarjeta de controles premium
-                  Container(
-                    padding: const EdgeInsets.all(30),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.cardDark,
-                          AppColors.cardDark.withOpacity(0.9),
-                        ],
-                      ),
-                      border: Border.all(
-                        color: AppColors.accentOrange.withOpacity(0.2),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
+                  // Tarjeta de controles principal
+                  Card(
+                    elevation: 3.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
-                    child: Column(
-                      children: [
-                        // Indicador de estado
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isPlaying
-                                ? Colors.green.withOpacity(0.2)
-                                : Colors.orange.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isPlaying
-                                  ? Colors.green.withOpacity(0.4)
-                                  : Colors.orange.withOpacity(0.4),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: isPlaying
-                                      ? Colors.green
-                                      : Colors.orange,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                isPlaying ? 'EN VIVO' : 'PAUSADO',
-                                style: TextStyle(
-                                  color: isPlaying
-                                      ? Colors.green
-                                      : Colors.orange,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                            ],
-                          ),
+                    child: Container(
+                      padding: EdgeInsets.all(isDesktop ? 30.0 : 24.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20.0),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white,
+                            _backgroundColor,
+                          ],
                         ),
-                        const SizedBox(height: 25),
-
-                        // Barra de progreso elegante
-                        Column(
-                          children: [
-                            // Tiempo transcurrido
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      ),
+                      child: Column(
+                        children: [
+                          // Indicador de estado
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isDesktop ? 20.0 : 16.0,
+                              vertical: isDesktop ? 10.0 : 8.0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isPlaying
+                                  ? Colors.green.withOpacity(0.1)
+                                  : Colors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20.0),
+                              border: Border.all(
+                                color: isPlaying
+                                    ? Colors.green.withOpacity(0.3)
+                                    : Colors.orange.withOpacity(0.3),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  '2:45',
-                                  style: TextStyle(
-                                    color: AppColors.greyText,
-                                    fontSize: 12,
+                                Container(
+                                  width: 10.0,
+                                  height: 10.0,
+                                  decoration: BoxDecoration(
+                                    color: isPlaying ? Colors.green : Colors.orange,
+                                    shape: BoxShape.circle,
                                   ),
                                 ),
+                                SizedBox(width: 10.0),
                                 Text(
-                                  '5:30',
+                                  isPlaying ? 'EN VIVO AHORA' : 'PAUSADO',
                                   style: TextStyle(
-                                    color: AppColors.greyText,
-                                    fontSize: 12,
+                                    color: isPlaying ? Colors.green : Colors.orange,
+                                    fontSize: isDesktop ? 14.0 : 12.0,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.2,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            // Barra de progreso
-                            Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: AppColors.greyText.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                              child: Stack(
-                                children: [
-                                  // Progreso reproducido
-                                  Container(
-                                    height: 6,
-                                    width: MediaQuery.of(context).size.width * 0.5,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          AppColors.accentOrange,
-                                          AppColors.accentOrange.withOpacity(0.8),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(3),
-                                    ),
-                                  ),
-                                  // Punto de control
-                                  Positioned(
-                                    left: MediaQuery.of(context).size.width * 0.5 - 8,
-                                    top: -4,
-                                    child: Container(
-                                      width: 16,
-                                      height: 16,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.accentOrange,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: AppColors.accentOrange.withOpacity(0.5),
-                                            blurRadius: 8,
-                                            spreadRadius: 2,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 30),
+                          ),
+                          SizedBox(height: isDesktop ? 30.0 : 25.0),
 
-                        // Controles de reproducción
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            // Botón play/pause principal
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppColors.accentOrange,
-                                    AppColors.accentOrange.withOpacity(0.8),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.accentOrange.withOpacity(0.4),
-                                    blurRadius: 15,
-                                    spreadRadius: 2,
+                          // Barra de progreso
+                          Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '2:45',
+                                    style: TextStyle(
+                                      color: _greyText,
+                                      fontSize: isDesktop ? 14.0 : 12.0,
+                                    ),
+                                  ),
+                                  Text(
+                                    '5:30',
+                                    style: TextStyle(
+                                      color: _greyText,
+                                      fontSize: isDesktop ? 14.0 : 12.0,
+                                    ),
                                   ),
                                 ],
                               ),
-                              child: IconButton(
-                                icon: Icon(
-                                  isPlaying
-                                      ? Icons.pause_rounded
-                                      : Icons.play_arrow_rounded,
-                                  size: 40,
-                                  color: AppColors.white,
+                              SizedBox(height: 10.0),
+                              Container(
+                                height: 6.0,
+                                decoration: BoxDecoration(
+                                  color: _greyText.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(3.0),
                                 ),
-                                onPressed: () {
-                                  if (audioProvider.isPlaying) {
-                                    audioProvider.pause();
-                                  } else {
-                                    audioProvider.play('https://servidor26.brlogic.com:7652/live');
-                                  }
-                                },
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      height: 6.0,
+                                      width: MediaQuery.of(context).size.width * 0.5,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [_primaryColor, _secondaryColor],
+                                        ),
+                                        borderRadius: BorderRadius.circular(3.0),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: MediaQuery.of(context).size.width * 0.5 - 8.0,
+                                      top: -4.0,
+                                      child: Container(
+                                        width: 16.0,
+                                        height: 16.0,
+                                        decoration: BoxDecoration(
+                                          color: _primaryColor,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: _primaryColor.withOpacity(0.4),
+                                              blurRadius: 8.0,
+                                              spreadRadius: 2.0,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
+                            ],
+                          ),
+                          SizedBox(height: isDesktop ? 35.0 : 30.0),
+
+                          // Controles de reproducción
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Botón play/pause principal
+                              Container(
+                                width: isDesktop ? 100.0 : 80.0,
+                                height: isDesktop ? 100.0 : 80.0,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [_primaryColor, _secondaryColor],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: _primaryColor.withOpacity(0.3),
+                                      blurRadius: 15.0,
+                                      spreadRadius: 3.0,
+                                    ),
+                                  ],
+                                ),
+                                child: IconButton(
+                                  icon: Icon(
+                                    isPlaying
+                                        ? Icons.pause_rounded
+                                        : Icons.play_arrow_rounded,
+                                    size: isDesktop ? 45.0 : 35.0,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    if (audioProvider.isPlaying) {
+                                      audioProvider.pause();
+                                    } else {
+                                      audioProvider.play('https://servidor26.brlogic.com:7652/live');
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: isDesktop ? 25.0 : 20.0),
+
+                          // Información adicional
+                          Text(
+                            '128 oyentes en vivo • Calidad: 128kbps',
+                            style: TextStyle(
+                              color: _greyText,
+                              fontSize: isDesktop ? 14.0 : 12.0,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  SizedBox(height: isDesktop ? 32.0 : 24.0),
 
                   // Sección dinámica (Información o Chat)
-                  _showChat ? _buildChatContent() : _buildRadioInfo(),
+                  _showChat ? _buildChatContent(isDesktop) : _buildRadioInfo(isDesktop),
 
-                  const SizedBox(height: 40),
+                  SizedBox(height: isDesktop ? 40.0 : 32.0),
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+      // Bottom Navigation Bar idéntico al HomeScreen
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
+        backgroundColor: Colors.white,
+        selectedItemColor: _primaryColor,
+        unselectedItemColor: _greyText,
+        type: BottomNavigationBarType.fixed,
+        selectedFontSize: 12.0,
+        unselectedFontSize: 12.0,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Inicio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.radio),
+            label: 'Radio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.live_tv),
+            label: 'TV',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Perfil',
           ),
         ],
       ),
@@ -412,237 +473,159 @@ class _RadioScreenState extends State<RadioScreen> {
   }
 
   // Widget para construir el contenido del chat
-  Widget _buildChatContent() {
-    return Container(
-      height: 400, // Altura fija para el chat
-      decoration: BoxDecoration(
-        color: AppColors.cardDark,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.primaryBlue.withOpacity(0.2),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
+  Widget _buildChatContent(bool isDesktop) {
+    return Card(
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Column(
-          children: [
-            // Header del chat
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primaryBlue,
-                    AppColors.primaryBlue.withOpacity(0.8),
-                  ],
+      child: Container(
+        height: isDesktop ? 450.0 : 400.0,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(
+            color: _primaryColor.withOpacity(0.1),
+            width: 1.5,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20.0),
+          child: Column(
+            children: [
+              // Header del chat
+              Container(
+                padding: EdgeInsets.all(isDesktop ? 20.0 : 16.0),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [_primaryColor, _primaryColor.withOpacity(0.8)],
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0),
+                  ),
                 ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.chat_rounded, color: Colors.white, size: isDesktop ? 24.0 : 20.0),
                     ),
-                    child: const Icon(Icons.chat_rounded, color: Colors.white, size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Chat en Vivo - Radio',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                    SizedBox(width: 12.0),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Chat en Vivo - Radio',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: isDesktop ? 18.0 : 16.0,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Consumer<ChatProvider>(
-                        builder: (context, chatProvider, child) {
-                          return Text(
-                            '${chatProvider.messages.length} mensajes • ${chatProvider.isAuthenticated ? 'Conectado' : 'Desconectado'}',
-                            style: TextStyle(
-                              color: AppColors.white.withOpacity(0.8),
-                              fontSize: 12,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.withOpacity(0.5),
-                          blurRadius: 5,
-                          spreadRadius: 1,
+                        SizedBox(height: 2.0),
+                        Consumer<ChatProvider>(
+                          builder: (context, chatProvider, child) {
+                            return Text(
+                              '${chatProvider.messages.length} mensajes • ${chatProvider.isAuthenticated ? 'Conectado' : 'Desconectado'}',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: isDesktop ? 13.0 : 11.0,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-            // Contenido del chat
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.darkBackground,
+                    Spacer(),
+                    Container(
+                      width: 12.0,
+                      height: 12.0,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.5),
+                            blurRadius: 5.0,
+                            spreadRadius: 1.0,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                child: _buildCustomChatScreen(),
               ),
-            ),
-          ],
+              // Contenido del chat
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: _backgroundColor,
+                  ),
+                  child: _buildCustomChatScreen(isDesktop),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   // Widget para construir la información de la radio
-  Widget _buildRadioInfo() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: AppColors.cardDark.withOpacity(0.6),
-        border: Border.all(
-          color: AppColors.accentOrange.withOpacity(0.1),
-          width: 1,
+  Widget _buildRadioInfo(bool isDesktop) {
+    return Card(
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(isDesktop ? 28.0 : 24.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.0),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '📻 Acerca de Radio Quishkambalito',
-            style: TextStyle(
-              color: AppColors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Disfruta de la mejor programación musical las 24 horas del día con Radio Quishkambalito. '
-                'Transmitiendo en vivo para todo el mundo con la mejor selección de música y contenido local.',
-            style: TextStyle(
-              color: AppColors.greyText,
-              fontSize: 14,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Estadísticas
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem(
-                '128',
-                'Oyentes ahora',
-                Icons.people_rounded,
-              ),
-              _buildStatItem(
-                '24/7',
-                'Transmisión',
-                Icons.schedule_rounded,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Versión personalizada del LiveChatScreen
-  Widget _buildCustomChatScreen() {
-    return Consumer<ChatProvider>(
-      builder: (context, chatProvider, child) {
-        if (chatProvider.isLoading) {
-          return _buildChatLoading();
-        }
-
-        if (!chatProvider.isAuthenticated) {
-          return _buildChatLogin(context, chatProvider);
-        }
-
-        return _buildChatMessages(chatProvider);
-      },
-    );
-  }
-
-  Widget _buildChatLoading() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
-          ),
-          const SizedBox(height: 16),
-          Text('Cargando chat...', style: TextStyle(color: AppColors.greyText)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChatLogin(BuildContext context, ChatProvider chatProvider) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.chat_rounded, size: 60, color: AppColors.primaryBlue),
-            const SizedBox(height: 20),
-            Text(
-              'Únete a la conversación',
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Inicia sesión para participar en el chat en vivo de la radio',
-              style: TextStyle(color: AppColors.greyText, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () => chatProvider.signInWithGoogle(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryBlue,
-                foregroundColor: AppColors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
+            Row(
+              children: [
+                Icon(Icons.info_rounded, color: _primaryColor, size: isDesktop ? 24.0 : 20.0),
+                SizedBox(width: 12.0),
+                Text(
+                  'Acerca de Radio Quishkambalito',
+                  style: TextStyle(
+                    color: _textColor,
+                    fontSize: isDesktop ? 20.0 : 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+              ],
+            ),
+            SizedBox(height: 16.0),
+            Text(
+              'Disfruta de la mejor programación musical las 24 horas del día con Radio Quishkambalito. '
+                  'Transmitiendo en vivo para todo el mundo con la mejor selección de música y contenido local.',
+              style: TextStyle(
+                color: _greyText,
+                fontSize: isDesktop ? 15.0 : 14.0,
+                height: 1.5,
               ),
-              child: const Text('Iniciar sesión con Google'),
+            ),
+            SizedBox(height: 20.0),
+            // Estadísticas
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatItem('128', 'Oyentes ahora', Icons.people_rounded, isDesktop),
+                _buildStatItem('24/7', 'Transmisión', Icons.schedule_rounded, isDesktop),
+              ],
             ),
           ],
         ),
@@ -650,7 +633,96 @@ class _RadioScreenState extends State<RadioScreen> {
     );
   }
 
-  Widget _buildChatMessages(ChatProvider chatProvider) {
+  // Versión personalizada del LiveChatScreen
+  Widget _buildCustomChatScreen(bool isDesktop) {
+    return Consumer<ChatProvider>(
+      builder: (context, chatProvider, child) {
+        if (chatProvider.isLoading) {
+          return _buildChatLoading(isDesktop);
+        }
+
+        if (!chatProvider.isAuthenticated) {
+          return _buildChatLogin(context, chatProvider, isDesktop);
+        }
+
+        return _buildChatMessages(chatProvider, isDesktop);
+      },
+    );
+  }
+
+  Widget _buildChatLoading(bool isDesktop) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+          ),
+          SizedBox(height: 16.0),
+          Text(
+            'Cargando chat...',
+            style: TextStyle(
+              color: _greyText,
+              fontSize: isDesktop ? 16.0 : 14.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChatLogin(BuildContext context, ChatProvider chatProvider, bool isDesktop) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(isDesktop ? 30.0 : 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.chat_rounded, size: isDesktop ? 70.0 : 60.0, color: _primaryColor),
+            SizedBox(height: 20.0),
+            Text(
+              'Únete a la conversación',
+              style: TextStyle(
+                color: _textColor,
+                fontSize: isDesktop ? 20.0 : 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Text(
+              'Inicia sesión para participar en el chat en vivo de la radio',
+              style: TextStyle(
+                color: _greyText,
+                fontSize: isDesktop ? 15.0 : 14.0,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 30.0),
+            ElevatedButton(
+              onPressed: () => chatProvider.signInWithGoogle(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _primaryColor,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isDesktop ? 35.0 : 30.0,
+                  vertical: isDesktop ? 16.0 : 15.0,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+              ),
+              child: Text(
+                'Iniciar sesión con Google',
+                style: TextStyle(fontSize: isDesktop ? 16.0 : 14.0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatMessages(ChatProvider chatProvider, bool isDesktop) {
     final messageController = TextEditingController();
     final scrollController = ScrollController();
 
@@ -665,22 +737,22 @@ class _RadioScreenState extends State<RadioScreen> {
               children: [
                 Icon(
                   Icons.forum_rounded,
-                  size: 60,
-                  color: AppColors.primaryBlue.withOpacity(0.5),
+                  size: isDesktop ? 70.0 : 60.0,
+                  color: _primaryColor.withOpacity(0.4),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.0),
                 Text(
                   'No hay mensajes aún',
                   style: TextStyle(
-                    color: AppColors.greyText,
-                    fontSize: 16,
+                    color: _greyText,
+                    fontSize: isDesktop ? 17.0 : 16.0,
                   ),
                 ),
                 Text(
                   'Sé el primero en enviar un mensaje',
                   style: TextStyle(
-                    color: AppColors.greyText.withOpacity(0.7),
-                    fontSize: 14,
+                    color: _greyText.withOpacity(0.7),
+                    fontSize: isDesktop ? 14.0 : 13.0,
                   ),
                 ),
               ],
@@ -688,21 +760,21 @@ class _RadioScreenState extends State<RadioScreen> {
           )
               : ListView.builder(
             controller: scrollController,
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isDesktop ? 20.0 : 16.0),
             itemCount: chatProvider.messages.length,
             itemBuilder: (context, index) {
-              return _buildMessageItem(chatProvider.messages[index], chatProvider);
+              return _buildMessageItem(chatProvider.messages[index], chatProvider, isDesktop);
             },
           ),
         ),
 
-        // Input de mensaje con botón de logout integrado
+        // Input de mensaje
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(isDesktop ? 16.0 : 12.0),
           decoration: BoxDecoration(
-            color: AppColors.cardDark,
+            color: Colors.white,
             border: Border(
-              top: BorderSide(color: AppColors.primaryBlue.withOpacity(0.3)),
+              top: BorderSide(color: _primaryColor.withOpacity(0.2)),
             ),
           ),
           child: Row(
@@ -710,32 +782,36 @@ class _RadioScreenState extends State<RadioScreen> {
               // Botón de logout
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20.0),
+                  border: Border.all(color: Colors.red.withOpacity(0.3)),
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.exit_to_app, color: Colors.red, size: 20),
+                  icon: Icon(Icons.exit_to_app, color: Colors.red, size: isDesktop ? 22.0 : 20.0),
                   onPressed: () => chatProvider.signOut(),
                   tooltip: 'Cerrar sesión',
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.0),
 
               // Campo de texto
               Expanded(
                 child: TextField(
                   controller: messageController,
-                  style: TextStyle(color: AppColors.white),
+                  style: TextStyle(color: _textColor),
                   decoration: InputDecoration(
                     hintText: 'Escribe un mensaje...',
-                    hintStyle: TextStyle(color: AppColors.greyText),
+                    hintStyle: TextStyle(color: _greyText),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
                     ),
                     filled: true,
-                    fillColor: AppColors.darkBackground,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    fillColor: _backgroundColor,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: isDesktop ? 20.0 : 16.0,
+                      vertical: isDesktop ? 16.0 : 12.0,
+                    ),
                   ),
                   onSubmitted: (value) {
                     if (value.trim().isNotEmpty) {
@@ -745,13 +821,14 @@ class _RadioScreenState extends State<RadioScreen> {
                   },
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.0),
 
               // Botón de enviar
               CircleAvatar(
-                backgroundColor: AppColors.primaryBlue,
+                backgroundColor: _primaryColor,
+                radius: isDesktop ? 24.0 : 20.0,
                 child: IconButton(
-                  icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                  icon: Icon(Icons.send, color: Colors.white, size: isDesktop ? 22.0 : 18.0),
                   onPressed: () {
                     final text = messageController.text.trim();
                     if (text.isNotEmpty) {
@@ -768,7 +845,7 @@ class _RadioScreenState extends State<RadioScreen> {
     );
   }
 
-  Widget _buildMessageItem(ChatMessage message, ChatProvider chatProvider) {
+  Widget _buildMessageItem(ChatMessage message, ChatProvider chatProvider, bool isDesktop) {
     final isCurrentUser = message.userId == chatProvider.currentUser?.uid;
     final currentTime = DateTime.now();
     final messageTime = message.timestamp;
@@ -786,29 +863,30 @@ class _RadioScreenState extends State<RadioScreen> {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: isDesktop ? 16.0 : 12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: isCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isCurrentUser)
             CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.primaryBlue.withOpacity(0.2),
+              radius: isDesktop ? 18.0 : 16.0,
+              backgroundColor: _primaryColor.withOpacity(0.1),
               backgroundImage: message.userAvatar.isNotEmpty
                   ? NetworkImage(message.userAvatar)
                   : null,
               child: message.userAvatar.isEmpty
                   ? Text(
                 message.userName[0].toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.white,
+                style: TextStyle(
+                  fontSize: isDesktop ? 14.0 : 12.0,
+                  color: _primaryColor,
+                  fontWeight: FontWeight.bold,
                 ),
               )
                   : null,
             ),
-          if (!isCurrentUser) const SizedBox(width: 8),
+          if (!isCurrentUser) SizedBox(width: isDesktop ? 12.0 : 8.0),
 
           Expanded(
             child: Column(
@@ -817,51 +895,70 @@ class _RadioScreenState extends State<RadioScreen> {
                 if (!isCurrentUser)
                   Text(
                     message.userName,
-                    style: TextStyle(color: AppColors.greyText, fontSize: 12),
+                    style: TextStyle(
+                      color: _greyText,
+                      fontSize: isDesktop ? 13.0 : 12.0,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
+                if (!isCurrentUser) SizedBox(height: 4.0),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(isDesktop ? 14.0 : 12.0),
                   decoration: BoxDecoration(
-                    color: isCurrentUser
-                        ? AppColors.primaryBlue
-                        : AppColors.cardDark,
-                    borderRadius: BorderRadius.circular(16),
+                    color: isCurrentUser ? _primaryColor : Colors.white,
+                    borderRadius: BorderRadius.circular(16.0),
+                    border: isCurrentUser ? null : Border.all(color: _greyText.withOpacity(0.2)),
+                    boxShadow: isCurrentUser
+                        ? [
+                      BoxShadow(
+                        color: _primaryColor.withOpacity(0.2),
+                        blurRadius: 8.0,
+                        offset: Offset(0, 2.0),
+                      ),
+                    ]
+                        : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4.0,
+                        offset: Offset(0, 1.0),
+                      ),
+                    ],
                   ),
                   child: Text(
                     message.text,
                     style: TextStyle(
-                      color: isCurrentUser
-                          ? AppColors.white
-                          : AppColors.greyText,
+                      color: isCurrentUser ? Colors.white : _textColor,
+                      fontSize: isDesktop ? 15.0 : 14.0,
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.0),
                 Text(
                   timeText,
                   style: TextStyle(
-                    color: AppColors.greyText.withOpacity(0.6),
-                    fontSize: 10,
+                    color: _greyText.withOpacity(0.6),
+                    fontSize: isDesktop ? 11.0 : 10.0,
                   ),
                 ),
               ],
             ),
           ),
 
-          if (isCurrentUser) const SizedBox(width: 8),
+          if (isCurrentUser) SizedBox(width: isDesktop ? 12.0 : 8.0),
           if (isCurrentUser)
             CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.accentOrange.withOpacity(0.2),
+              radius: isDesktop ? 18.0 : 16.0,
+              backgroundColor: _secondaryColor.withOpacity(0.1),
               backgroundImage: chatProvider.currentUser?.photoURL != null
                   ? NetworkImage(chatProvider.currentUser!.photoURL!)
                   : null,
               child: chatProvider.currentUser?.photoURL == null
                   ? Text(
                 chatProvider.currentUser?.displayName?[0].toUpperCase() ?? 'U',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.white,
+                style: TextStyle(
+                  fontSize: isDesktop ? 14.0 : 12.0,
+                  color: _secondaryColor,
+                  fontWeight: FontWeight.bold,
                 ),
               )
                   : null,
@@ -871,83 +968,54 @@ class _RadioScreenState extends State<RadioScreen> {
     );
   }
 
-  Widget _buildControlButton(
-      IconData icon,
-      Color color,
-      VoidCallback onPressed,
-      ) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: AppColors.cardDark,
-        shape: BoxShape.circle,
-        border: Border.all(color: color.withOpacity(0.3), width: 1.5),
-      ),
-      child: IconButton(
-        icon: Icon(icon, size: 24, color: color),
-        onPressed: onPressed,
-      ),
-    );
-  }
-
-  Widget _buildSmallControlButton(
-      IconData icon,
-      Color color,
-      VoidCallback onPressed,
-      ) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: AppColors.cardDark,
-        shape: BoxShape.circle,
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
-      ),
-      child: IconButton(
-        icon: Icon(icon, size: 20, color: color),
-        onPressed: onPressed,
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String value, String label, IconData icon) {
+  Widget _buildStatItem(String value, String label, IconData icon, bool isDesktop) {
     return Column(
       children: [
-        Icon(icon, size: 20, color: AppColors.accentOrange),
-        const SizedBox(height: 4),
+        Container(
+          width: isDesktop ? 50.0 : 40.0,
+          height: isDesktop ? 50.0 : 40.0,
+          decoration: BoxDecoration(
+            color: _primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(color: _primaryColor.withOpacity(0.2)),
+          ),
+          child: Icon(icon, size: isDesktop ? 24.0 : 20.0, color: _primaryColor),
+        ),
+        SizedBox(height: 8.0),
         Text(
           value,
           style: TextStyle(
-            color: AppColors.white,
-            fontSize: 14,
+            color: _textColor,
+            fontSize: isDesktop ? 16.0 : 14.0,
             fontWeight: FontWeight.bold,
           ),
         ),
-        Text(label, style: TextStyle(color: AppColors.greyText, fontSize: 10)),
+        Text(
+          label,
+          style: TextStyle(
+            color: _greyText,
+            fontSize: isDesktop ? 12.0 : 10.0,
+          ),
+        ),
       ],
     );
   }
 }
 
-// CustomPainter para efecto de ondas de radio - CORREGIDO
+// CustomPainter para efecto de ondas de radio
 class _RadioWavesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0; // strokeWidth debe estar en la misma declaración
-
     final center = Offset(size.width / 2, size.height / 2);
 
     for (int i = 1; i <= 5; i++) {
       final radius = (size.width / 2) * (i / 5);
-      canvas.drawCircle(
-        center,
-        radius,
-        paint..color = Colors.white.withOpacity(0.1),
-      );
+      final paint = Paint()
+        ..color = Colors.white.withOpacity(0.1)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+
+      canvas.drawCircle(center, radius, paint);
     }
   }
 

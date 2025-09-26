@@ -1,806 +1,767 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 import 'package:myapp/theme/colors.dart';
 import 'package:myapp/screens/radio_screen.dart';
 import 'package:myapp/screens/tv_screen.dart';
 import 'package:myapp/screens/live_chat_screen.dart';
+import 'package:myapp/services/api_service.dart';
 
-class _DotsPainter extends CustomPainter {
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-    final random = Random(42);
-    for (int i = 0; i < 50; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final radius = random.nextDouble() * 2 + 1;
-      canvas.drawCircle(Offset(x, y), radius, paint);
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  List<Publicidad> publicidades = [];
+  bool isLoading = true;
+  String errorMessage = '';
+  int _currentIndex = 0;
+
+  // Colores estilo red social
+  final Color _primaryColor = Color(0xFF0099FF);
+  final Color _secondaryColor = Color(0xFFFFD600);
+  final Color _backgroundColor = Color(0xFFF8F9FA);
+  final Color _textColor = Color(0xFF1C1E21);
+  final Color _greyText = Color(0xFF65676B);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPublicidades();
+  }
+
+  Future<void> _loadPublicidades() async {
+    try {
+      final publicidadesData = await ApiService.fetchPublicidades();
+      setState(() {
+        publicidades = publicidadesData;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        break;
+      case 1:
+        Navigator.push(context, MaterialPageRoute(builder: (context) => RadioScreen()));
+        break;
+      case 2:
+        Navigator.push(context, MaterialPageRoute(builder: (context) => TvScreen()));
+        break;
+      case 3:
+        break;
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWeb = screenWidth > 600;
-    final gridCount = isWeb ? 3 : 1; // Cambiado a 1 columna en móvil para mejor visualización
+    final screenSize = MediaQuery.of(context).size;
+    final isLargeDesktop = screenSize.width > 1440;
+    final isDesktop = screenSize.width > 1024;
+    final isTablet = screenSize.width > 768;
+    final isLargeMobile = screenSize.width > 480;
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverAppBar(
-            expandedHeight: isWeb ? 220 : 200, // Más compacto en móvil
-            floating: false,
-            pinned: true,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'Radio y TV Quishkambalito',
-                style: TextStyle(
-                  fontSize: isWeb ? 18 : 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.8),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-              ),
-              centerTitle: true,
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.primaryBlue.withOpacity(0.95),
-                      AppColors.darkBackground.withOpacity(0.8),
-                    ],
+      backgroundColor: _backgroundColor,
+      appBar: _buildAppBar(isLargeDesktop, isDesktop, isTablet, screenSize),
+      body: _buildBody(isLargeDesktop, isDesktop, isTablet, isLargeMobile, screenSize),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  AppBar _buildAppBar(bool isLargeDesktop, bool isDesktop, bool isTablet, Size screenSize) {
+    double getLogoSize() {
+      if (isLargeDesktop) return 100.0;
+      if (isDesktop) return 90.0;
+      if (isTablet) return 80.0;
+      if (screenSize.width > 400) return 70.0;
+      return 60.0;
+    }
+
+    double getTitleSize() {
+      if (isLargeDesktop) return 28.0;
+      if (isDesktop) return 24.0;
+      if (isTablet) return 20.0;
+      if (screenSize.width > 400) return 18.0;
+      return 16.0;
+    }
+
+    double getSubtitleSize() {
+      if (isLargeDesktop) return 16.0;
+      if (isDesktop) return 14.0;
+      if (isTablet) return 13.0;
+      return 12.0;
+    }
+
+    double getToolbarHeight() {
+      if (isLargeDesktop) return 130.0;
+      if (isDesktop) return 120.0;
+      if (isTablet) return 110.0;
+      return 100.0;
+    }
+
+    final logoSize = getLogoSize();
+    final titleSize = getTitleSize();
+    final subtitleSize = getSubtitleSize();
+    final toolbarHeight = getToolbarHeight();
+
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 2.0,
+      centerTitle: true,
+      toolbarHeight: toolbarHeight,
+      title: Container(
+        constraints: BoxConstraints(
+          maxWidth: isLargeDesktop ? 700.0 :
+          isDesktop ? 600.0 :
+          isTablet ? 500.0 :
+          screenSize.width * 0.9,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: logoSize,
+              height: logoSize,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [_primaryColor, _secondaryColor]),
+                borderRadius: BorderRadius.circular(20.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 12.0,
+                    offset: Offset(0, 4.0),
                   ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Opacity(
-                        opacity: 0.05,
-                        child: CustomPaint(painter: _DotsPainter()),
-                      ),
-                    ),
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: isWeb ? 100 : 80, // Más pequeño en móvil
-                            height: isWeb ? 100 : 80,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primaryBlue.withOpacity(0.4),
-                                  blurRadius: 20,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: ClipOval(
-                              child: Image.asset(
-                                'lib/assets/logoRadio.png',
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          AppColors.primaryBlue,
-                                          AppColors.accentOrange,
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      Icons.live_tv_rounded,
-                                      size: isWeb ? 40 : 30,
-                                      color: AppColors.white,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-                      ),
-                    ),
-                  ],
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.asset(
+                  'lib/assets/logoRadio.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.live_tv, color: Colors.white, size: logoSize * 0.4);
+                  },
                 ),
               ),
             ),
-          ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(isWeb ? 30.0 : 16.0), // Menos padding en móvil
+            SizedBox(width: isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 16.0 : 12.0),
+            Flexible(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // SECCIÓN PRINCIPAL MEJORADA PARA MÓVIL
-                  _buildSectionHeader('¿Qué quieres disfrutar hoy?'),
-                  const SizedBox(height: 20),
-
-                  // LISTA EN VEZ DE GRID PARA MÓVIL - Mucho mejor en celular
-                  isWeb ? _buildWebGrid(context) : _buildMobileList(context),
-
-                  const SizedBox(height: 24),
-
-                  // PRIMER ESPACIO PUBLICITARIO
-                  _buildModernAdSpaceWithImage(
-                    context,
-                    'Patrocinado por Quishkambalito',
-                    'Amazonas',
-                    'Ven y Disfruta',
-                    'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-                    Colors.redAccent,
+                  Text(
+                    'Radio Quishkambalito',
+                    style: TextStyle(
+                      color: _textColor,
+                      fontSize: titleSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // SEGUNDO ESPACIO PUBLICITARIO
-                  _buildModernAdSpaceWithImage(
-                    context,
-                    'Patrocinado por Quishkambalito',
-                    'Chachapoyas',
-                    'Ven y Disfruta',
-                    'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-                    Colors.blueAccent,
+                  Text(
+                    'Transmitiendo 24/7',
+                    style: TextStyle(
+                      color: _greyText,
+                      fontSize: subtitleSize,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.notifications_none,
+              color: _textColor,
+              size: isLargeDesktop ? 32.0 : isDesktop ? 30.0 : isTablet ? 28.0 : 24.0),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: Icon(Icons.search,
+              color: _textColor,
+              size: isLargeDesktop ? 32.0 : isDesktop ? 30.0 : isTablet ? 28.0 : 24.0),
+          onPressed: () {},
+        ),
+        SizedBox(width: isLargeDesktop ? 20.0 : isDesktop ? 16.0 : isTablet ? 12.0 : 8.0),
+      ],
+    );
+  }
 
-                  const SizedBox(height: 24),
+  Widget _buildBody(bool isLargeDesktop, bool isDesktop, bool isTablet, bool isLargeMobile, Size screenSize) {
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildQuickAccessSection(isLargeDesktop, isDesktop, isTablet, isLargeMobile, screenSize),
+        ),
+        SliverToBoxAdapter(
+          child: SizedBox(height: isLargeDesktop ? 40.0 : isDesktop ? 32.0 : isTablet ? 28.0 : 24.0),
+        ),
+        SliverToBoxAdapter(
+          child: _buildAdsSection(isLargeDesktop, isDesktop, isTablet, isLargeMobile, screenSize),
+        ),
+        SliverToBoxAdapter(
+          child: SizedBox(height: isLargeDesktop ? 50.0 : isDesktop ? 40.0 : isTablet ? 32.0 : 28.0),
+        ),
+      ],
+    );
+  }
 
-                  // TERCER ESPACIO PUBLICITARIO
-                  _buildModernAdSpaceWithImage(
-                    context,
-                    'Patrocinado por Quishkambalito',
-                    'Iquitos',
-                    'Ven y Disfruta',
-                    'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-                    Colors.orangeAccent,
+  Widget _buildQuickAccessSection(bool isLargeDesktop, bool isDesktop, bool isTablet, bool isLargeMobile, Size screenSize) {
+    final stories = [
+      _StoryItem('Radio', Icons.radio_rounded, _primaryColor, () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => RadioScreen()));
+      }),
+      _StoryItem('TV', Icons.live_tv_rounded, Color(0xFF00C851), () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => TvScreen()));
+      }),
+      _StoryItem('Chat', Icons.chat_rounded, Color(0xFFFF4444), () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => LiveChatScreen()));
+      }),
+    ];
+
+    double getItemWidth() {
+      if (isLargeDesktop) return 140.0;
+      if (isDesktop) return 120.0;
+      if (isTablet) return 110.0;
+      if (isLargeMobile) return 100.0;
+      return screenSize.width / 3.5;
+    }
+
+    double getIconSize() {
+      if (isLargeDesktop) return 42.0;
+      if (isDesktop) return 38.0;
+      if (isTablet) return 34.0;
+      if (isLargeMobile) return 30.0;
+      return 28.0;
+    }
+
+    double getSectionHeight() {
+      if (isLargeDesktop) return 160.0;
+      if (isDesktop) return 140.0;
+      if (isTablet) return 130.0;
+      if (isLargeMobile) return 120.0;
+      return 110.0;
+    }
+
+    final itemWidth = getItemWidth();
+    final iconSize = getIconSize();
+    final sectionHeight = getSectionHeight();
+
+    return Container(
+      margin: EdgeInsets.only(
+        top: isLargeDesktop ? 32.0 : isDesktop ? 28.0 : isTablet ? 24.0 : 20.0,
+        left: isLargeDesktop ? 40.0 : isDesktop ? 32.0 : isTablet ? 24.0 : 16.0,
+        right: isLargeDesktop ? 40.0 : isDesktop ? 32.0 : isTablet ? 24.0 : 16.0,
+      ),
+      child: Card(
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            vertical: isLargeDesktop ? 32.0 : isDesktop ? 28.0 : isTablet ? 24.0 : 20.0,
+            horizontal: isLargeDesktop ? 32.0 : isDesktop ? 28.0 : isTablet ? 24.0 : 20.0,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(left: 8.0, bottom: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 16.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.flash_on_rounded,
+                        color: _primaryColor,
+                        size: isLargeDesktop ? 32.0 : isDesktop ? 28.0 : isTablet ? 24.0 : 20.0),
+                    SizedBox(width: isLargeDesktop ? 16.0 : isDesktop ? 14.0 : isTablet ? 12.0 : 10.0),
+                    Text(
+                      'Acceso Rápido',
+                      style: TextStyle(
+                        color: _textColor,
+                        fontSize: isLargeDesktop ? 26.0 : isDesktop ? 22.0 : isTablet ? 20.0 : 18.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                height: sectionHeight,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: stories.length,
+                  itemBuilder: (context, index) {
+                    final story = stories[index];
+                    return _buildQuickAccessItem(story, itemWidth, iconSize);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickAccessItem(_StoryItem story, double width, double iconSize) {
+    return GestureDetector(
+      onTap: story.onTap,
+      child: Container(
+        width: width,
+        margin: EdgeInsets.only(right: 20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: width * 0.7,
+              height: width * 0.7,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(colors: [story.color, story.color.withOpacity(0.7)]),
+                border: Border.all(color: Colors.white, width: 4.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 12.0,
+                    offset: Offset(0, 6.0),
                   ),
+                ],
+              ),
+              child: Icon(story.icon, color: Colors.white, size: iconSize),
+            ),
+            SizedBox(height: 12.0),
+            Text(
+              story.title,
+              style: TextStyle(
+                color: _textColor,
+                fontSize: 14.0,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-                  const SizedBox(height: 32),
+  Widget _buildAdsSection(bool isLargeDesktop, bool isDesktop, bool isTablet, bool isLargeMobile, Size screenSize) {
+    double getPadding() {
+      if (isLargeDesktop) return 48.0;
+      if (isDesktop) return 40.0;
+      if (isTablet) return 32.0;
+      if (isLargeMobile) return 24.0;
+      return 20.0;
+    }
 
-                  // Sección de canales destacados
-                  _buildSectionHeader('Canales populares', showViewAll: true),
-                  const SizedBox(height: 16),
+    final padding = getPadding();
 
-                  SizedBox(
-                    height: isWeb ? 250 : 200, // Más compacto en móvil
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      children: [
-                        _buildPremiumChannelCard(
-                          'Canal Principal',
-                          '24/7 sin interrupciones',
-                          Icons.live_tv_rounded,
-                          AppColors.primaryBlue,
-                          0.9,
+    return Container(
+      color: _backgroundColor,
+      padding: EdgeInsets.symmetric(horizontal: padding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Card(
+            elevation: 2.0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            child: Container(
+              padding: EdgeInsets.all(isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 18.0 : 16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.campaign_rounded,
+                          color: _primaryColor,
+                          size: isLargeDesktop ? 32.0 : isDesktop ? 28.0 : isTablet ? 24.0 : 20.0),
+                      SizedBox(width: isLargeDesktop ? 16.0 : isDesktop ? 14.0 : isTablet ? 12.0 : 10.0),
+                      Text(
+                        'Publicidades',
+                        style: TextStyle(
+                          color: _textColor,
+                          fontSize: isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 18.0 : 16.0,
+                          fontWeight: FontWeight.bold,
                         ),
-                        _buildPremiumChannelCard(
-                          'Radio FM',
-                          'Música sin comerciales',
-                          Icons.radio_rounded,
-                          AppColors.accentOrange,
-                          0.8,
-                        ),
-                        _buildPremiumChannelCard(
-                          'Eventos',
-                          'Conciertos en vivo',
-                          Icons.event_rounded,
-                          Colors.purpleAccent,
-                          0.4,
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  Text(
+                    'Ver todas',
+                    style: TextStyle(
+                      color: _primaryColor,
+                      fontSize: isLargeDesktop ? 18.0 : isDesktop ? 16.0 : isTablet ? 14.0 : 12.0,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-
-                  const SizedBox(height: 32),
-
-                  // Sección de estadísticas
-                  _buildSectionHeader('Estadísticas en tiempo real'),
-                  const SizedBox(height: 16),
-
-                  _buildPremiumStatsSection(),
-
-                  const SizedBox(height: 32),
-
-                  // CUARTO ESPACIO PUBLICITARIO
-                  _buildModernAdSpaceWithImage(
-                    context,
-                    'Patrocinado por McDonald\'s',
-                    'Happy Meal',
-                    'Disfruta de nuestro menú infantil con juguete incluido',
-                    'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-                    Colors.yellowAccent,
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // QUINTO ESPACIO PUBLICITARIO
-                  _buildModernAdSpaceWithImage(
-                    context,
-                    'Patrocinado por Netflix',
-                    'Nuevos estrenos',
-                    'Miles de películas y series por solo \$9.99/mes',
-                    'https://images.unsplash.com/photo-1489599102910-59206b8ca314?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-                    Colors.redAccent,
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // SEXTO ESPACIO PUBLICITARIO
-                  _buildModernAdSpaceWithImage(
-                    context,
-                    'Patrocinado por Amazon',
-                    'Prime Day',
-                    'Ofertas exclusivas con envío gratis para miembros Prime',
-                    'https://images.unsplash.com/photo-1526947425960-945c6e72858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-                    Colors.blueAccent,
-                  ),
-
-                  const SizedBox(height: 40),
-                  _buildAppFooter(),
                 ],
               ),
             ),
           ),
+          SizedBox(height: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 16.0),
+          if (isLoading)
+            _buildLoadingFeed(isLargeDesktop, isDesktop, isTablet)
+          else if (errorMessage.isNotEmpty)
+            _buildErrorFeed(isLargeDesktop, isDesktop, isTablet)
+          else if (publicidades.isEmpty)
+              _buildEmptyFeed(isLargeDesktop, isDesktop, isTablet)
+            else
+              Column(
+                children: publicidades.map((publicidad) =>
+                    _buildPostCard(publicidad, isLargeDesktop, isDesktop, isTablet, isLargeMobile, screenSize)).toList(),
+              ),
         ],
       ),
     );
   }
 
-  // Widget para construir grid en web
-  Widget _buildWebGrid(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 20,
-      mainAxisSpacing: 20,
-      childAspectRatio: 0.85,
-      children: [
-        _buildEnhancedFeatureCard(
-          context,
-          'Radio en Vivo',
-          Icons.radio_rounded,
-          AppColors.accentOrange,
-          const RadioScreen(),
-          'Escucha nuestra programación en vivo las 24 horas',
-        ),
-        _buildEnhancedFeatureCard(
-          context,
-          'TV en Vivo',
-          Icons.live_tv_rounded,
-          AppColors.primaryBlue,
-          const TvScreen(),
-          'Disfruta de nuestros canales de televisión',
-        ),
-        _buildEnhancedFeatureCard(
-          context,
-          'Chat en Vivo',
-          Icons.chat_rounded,
-          Colors.purpleAccent,
-          const LiveChatScreen(),
-          'Únete a la conversación con otros oyentes',
-        ),
-      ],
-    );
-  }
+  Widget _buildPostCard(Publicidad publicidad, bool isLargeDesktop, bool isDesktop, bool isTablet, bool isLargeMobile, Size screenSize) {
+    double getImageHeight() {
+      if (isLargeDesktop) return 320.0;
+      if (isDesktop) return 280.0;
+      if (isTablet) return 240.0;
+      if (isLargeMobile) return 200.0;
+      return 180.0;
+    }
 
-  // Widget para construir lista en móvil - MUCHO MEJOR para celular
-  Widget _buildMobileList(BuildContext context) {
-    return Column(
-      children: [
-        _buildMobileFeatureCard(
-          context,
-          'Radio en Vivo',
-          Icons.radio_rounded,
-          AppColors.accentOrange,
-          const RadioScreen(),
-          'Escucha programación 24/7',
-        ),
-        const SizedBox(height: 16),
-        _buildMobileFeatureCard(
-          context,
-          'TV en Vivo',
-          Icons.live_tv_rounded,
-          AppColors.primaryBlue,
-          const TvScreen(),
-          'Canales en directo',
-        ),
-        const SizedBox(height: 16),
-        _buildMobileFeatureCard(
-          context,
-          'Chat en Vivo',
-          Icons.chat_rounded,
-          Colors.purpleAccent,
-          const LiveChatScreen(),
-          'Conversa con la comunidad',
-        ),
-      ],
-    );
-  }
+    double getTitleSize() {
+      if (isLargeDesktop) return 20.0;
+      if (isDesktop) return 18.0;
+      if (isTablet) return 16.0;
+      if (isLargeMobile) return 15.0;
+      return 14.0;
+    }
 
-  // NUEVO: Tarjeta optimizada para móvil
-  Widget _buildMobileFeatureCard(
-      BuildContext context,
-      String title,
-      IconData icon,
-      Color color,
-      Widget screen,
-      String description,
-      ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => screen),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                color.withOpacity(0.15),
-                color.withOpacity(0.05),
-              ],
-            ),
-            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
-          ),
-          child: Row(
-            children: [
-              // Icono
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.7)],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, size: 28, color: Colors.white),
-              ),
+    double getTextSize() {
+      if (isLargeDesktop) return 16.0;
+      if (isDesktop) return 15.0;
+      if (isTablet) return 14.0;
+      if (isLargeMobile) return 13.0;
+      return 12.0;
+    }
 
-              const SizedBox(width: 16),
+    final imageHeight = getImageHeight();
+    final titleSize = getTitleSize();
+    final textSize = getTextSize();
 
-              // Texto
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: AppColors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 16.0),
+      child: Card(
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 18.0 : 16.0),
+              child: Row(
+                children: [
+                  Container(
+                    width: isLargeDesktop ? 60.0 : isDesktop ? 50.0 : isTablet ? 45.0 : 40.0,
+                    height: isLargeDesktop ? 60.0 : isDesktop ? 50.0 : isTablet ? 45.0 : 40.0,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(colors: [_primaryColor, _secondaryColor]),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        color: AppColors.greyText,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Flecha indicadora
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: color,
-                size: 20,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // NUEVO: Publicidad con imagen de demostración
-  Widget _buildModernAdSpaceWithImage(
-      BuildContext context,
-      String sponsorText,
-      String brandName,
-      String offer,
-      String imageUrl,
-      Color color,
-      ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showAdDetails(context, brandName),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: AppColors.cardDark,
-            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Imagen de demostración
-              Container(
-                height: 150,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
+                    child: Icon(Icons.campaign_rounded,
+                        color: Colors.white,
+                        size: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 18.0),
                   ),
-                  image: DecorationImage(
-                    image: NetworkImage(imageUrl),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.7),
-                        Colors.transparent,
+                  SizedBox(width: isLargeDesktop ? 20.0 : isDesktop ? 16.0 : isTablet ? 14.0 : 12.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Radio Quishkambalito',
+                          style: TextStyle(
+                            color: _textColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: isLargeDesktop ? 18.0 : isDesktop ? 16.0 : isTablet ? 14.0 : 12.0,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        Text(
+                          _formatDate(publicidad.fechaRegistro),
+                          style: TextStyle(
+                            color: _greyText,
+                            fontSize: isLargeDesktop ? 14.0 : isDesktop ? 13.0 : isTablet ? 12.0 : 11.0,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ],
                     ),
                   ),
-                  padding: const EdgeInsets.all(12),
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Patrocinado',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  Icon(Icons.more_horiz,
+                      color: _greyText,
+                      size: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 18.0),
+                ],
+              ),
+            ),
+            Container(
+              height: imageHeight,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(ApiService.getImageUrl(publicidad.imagen)),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 18.0 : 16.0,
+                vertical: isLargeDesktop ? 20.0 : isDesktop ? 16.0 : isTablet ? 14.0 : 12.0,
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.favorite_border, color: _greyText, size: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 18.0),
+                  SizedBox(width: isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 16.0 : 14.0),
+                  Icon(Icons.chat_bubble_outline, color: _greyText, size: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 18.0),
+                  SizedBox(width: isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 16.0 : 14.0),
+                  Icon(Icons.share, color: _greyText, size: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 18.0),
+                  Spacer(),
+                  Icon(Icons.bookmark_border, color: _greyText, size: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 18.0),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                left: isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 18.0 : 16.0,
+                right: isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 18.0 : 16.0,
+                bottom: isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 18.0 : 16.0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    publicidad.titulo,
+                    style: TextStyle(
+                      color: _textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: titleSize,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                  SizedBox(height: isLargeDesktop ? 12.0 : isDesktop ? 10.0 : isTablet ? 8.0 : 6.0),
+                  Text(
+                    publicidad.descripcion,
+                    style: TextStyle(
+                      color: _textColor,
+                      fontSize: textSize,
+                      height: 1.5,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: isLargeDesktop ? 16.0 : isDesktop ? 14.0 : isTablet ? 12.0 : 10.0),
+                  Text(
+                    '#RadioQuishkambalito #EnVivo',
+                    style: TextStyle(
+                      color: _primaryColor,
+                      fontSize: textSize - 1.0,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingFeed(bool isLargeDesktop, bool isDesktop, bool isTablet) {
+    return Column(
+      children: List.generate(2, (index) => _buildShimmerPost(isLargeDesktop, isDesktop, isTablet)),
+    );
+  }
+
+  Widget _buildShimmerPost(bool isLargeDesktop, bool isDesktop, bool isTablet) {
+    return Card(
+      margin: EdgeInsets.only(bottom: isLargeDesktop ? 28.0 : isDesktop ? 24.0 : isTablet ? 20.0 : 16.0),
+      child: Container(
+        padding: EdgeInsets.all(isLargeDesktop ? 24.0 : isDesktop ? 20.0 : isTablet ? 18.0 : 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                    backgroundColor: Colors.grey[300],
+                    radius: isLargeDesktop ? 30.0 : isDesktop ? 25.0 : isTablet ? 22.0 : 20.0
+                ),
+                SizedBox(width: 12.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                          height: isLargeDesktop ? 16.0 : isDesktop ? 14.0 : isTablet ? 13.0 : 12.0,
+                          width: 100.0,
+                          color: Colors.grey[300]
+                      ),
+                      SizedBox(height: 4.0),
+                      Container(
+                          height: isLargeDesktop ? 14.0 : isDesktop ? 12.0 : isTablet ? 11.0 : 10.0,
+                          width: 60.0,
+                          color: Colors.grey[300]
+                      ),
+                    ],
                   ),
                 ),
-              ),
-
-              // Contenido del anuncio
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      sponsorText,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Text(
-                      brandName,
-                      style: TextStyle(
-                        color: AppColors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Text(
-                      offer,
-                      style: TextStyle(
-                        color: AppColors.greyText,
-                        fontSize: 14,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Botón de acción
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _showAdDetails(context, brandName),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: color,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text('Ver más información'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showAdDetails(BuildContext context, String brand) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.cardDark,
-        title: Text(
-          'Oferta de $brand',
-          style: TextStyle(
-            color: AppColors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Text(
-          'Este es un espacio publicitario demostrativo. '
-              'En una implementación real, aquí se mostrarían los detalles '
-              'completos de la promoción especial con imágenes y enlaces.',
-          style: TextStyle(color: AppColors.greyText),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Me interesa'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Resto de los métodos (mantenidos pero optimizados)
-  Widget _buildEnhancedFeatureCard(
-      BuildContext context,
-      String title,
-      IconData icon,
-      Color color,
-      Widget screen,
-      String description,
-      ) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => screen)),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                color.withOpacity(0.15),
-                color.withOpacity(0.05),
               ],
             ),
-            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [color, color.withOpacity(0.7)]),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, size: 28, color: Colors.white),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: TextStyle(
-                  color: AppColors.greyText,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAppFooter() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.primaryBlue.withOpacity(0.3))),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'v1.0.0',
-            style: TextStyle(color: AppColors.greyText, fontSize: 12),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '© 2025 Radio Quishkambalito',
-            style: TextStyle(color: AppColors.greyText.withOpacity(0.7), fontSize: 11),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title, {bool showViewAll = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: AppColors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        if (showViewAll)
-          Text(
-            'Ver todos',
-            style: TextStyle(
-              color: AppColors.primaryBlue,
-              fontSize: 14,
+            SizedBox(height: 12.0),
+            Container(
+                height: isLargeDesktop ? 200.0 : isDesktop ? 180.0 : isTablet ? 160.0 : 150.0,
+                width: double.infinity,
+                color: Colors.grey[300]
             ),
-          ),
+            SizedBox(height: 12.0),
+            Container(
+                height: isLargeDesktop ? 14.0 : isDesktop ? 12.0 : isTablet ? 11.0 : 10.0,
+                width: double.infinity,
+                color: Colors.grey[300]
+            ),
+            SizedBox(height: 4.0),
+            Container(
+                height: isLargeDesktop ? 14.0 : isDesktop ? 12.0 : isTablet ? 11.0 : 10.0,
+                width: 200.0,
+                color: Colors.grey[300]
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorFeed(bool isLargeDesktop, bool isDesktop, bool isTablet) {
+    return Card(
+      child: Container(
+        padding: EdgeInsets.all(isLargeDesktop ? 32.0 : isDesktop ? 28.0 : isTablet ? 24.0 : 20.0),
+        child: Column(
+          children: [
+            Icon(Icons.error_outline,
+                color: Colors.red,
+                size: isLargeDesktop ? 60.0 : isDesktop ? 50.0 : isTablet ? 45.0 : 40.0),
+            SizedBox(height: 16.0),
+            Text(
+                'Error al cargar publicidades',
+                style: TextStyle(
+                  color: _textColor,
+                  fontSize: isLargeDesktop ? 20.0 : isDesktop ? 18.0 : isTablet ? 16.0 : 14.0,
+                )
+            ),
+            SizedBox(height: 8.0),
+            ElevatedButton(
+              onPressed: _loadPublicidades,
+              style: ElevatedButton.styleFrom(backgroundColor: _primaryColor),
+              child: Text('Reintentar',
+                  style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyFeed(bool isLargeDesktop, bool isDesktop, bool isTablet) {
+    return Card(
+      child: Container(
+        padding: EdgeInsets.all(isLargeDesktop ? 40.0 : isDesktop ? 35.0 : isTablet ? 30.0 : 25.0),
+        child: Column(
+          children: [
+            Icon(Icons.campaign_rounded,
+                color: _greyText,
+                size: isLargeDesktop ? 60.0 : isDesktop ? 50.0 : isTablet ? 45.0 : 40.0),
+            SizedBox(height: 16.0),
+            Text(
+                'No hay publicidades disponibles',
+                style: TextStyle(
+                  color: _greyText,
+                  fontSize: isLargeDesktop ? 18.0 : isDesktop ? 16.0 : isTablet ? 14.0 : 12.0,
+                )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  BottomNavigationBar _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      currentIndex: _currentIndex,
+      onTap: _onItemTapped,
+      backgroundColor: Colors.white,
+      selectedItemColor: _primaryColor,
+      unselectedItemColor: _greyText,
+      type: BottomNavigationBarType.fixed,
+      selectedFontSize: 14.0,
+      unselectedFontSize: 14.0,
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+        BottomNavigationBarItem(icon: Icon(Icons.radio), label: 'Radio'),
+        BottomNavigationBarItem(icon: Icon(Icons.live_tv), label: 'TV'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
       ],
     );
   }
 
-  Widget _buildPremiumChannelCard(
-      String title,
-      String subtitle,
-      IconData icon,
-      Color color,
-      double progress,
-      ) {
-    return Container(
-      width: 160,
-      margin: const EdgeInsets.only(right: 15),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: [color.withOpacity(0.15), Colors.transparent],
-        ),
-        border: Border.all(color: color.withOpacity(0.25), width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [color.withOpacity(0.3), color.withOpacity(0.1)]),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: color.withOpacity(0.4), width: 2),
-            ),
-            child: Icon(icon, size: 22, color: color),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(color: AppColors.greyText, fontSize: 11),
-          ),
-        ],
-      ),
-    );
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString.split(' ')[0]);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return dateString;
+    }
   }
+}
 
-  Widget _buildPremiumStatsSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: [AppColors.primaryBlue.withOpacity(0.1), AppColors.cardDark],
-        ),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2), width: 1.5),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildPremiumStatItem('1.2K', 'Oyentes activos', Icons.people_rounded, AppColors.primaryBlue),
-          _buildPremiumStatItem('24/7', 'Transmisión', Icons.online_prediction_rounded, AppColors.accentOrange),
-        ],
-      ),
-    );
-  }
+class _StoryItem {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
-  Widget _buildPremiumStatItem(String value, String label, IconData icon, Color color) {
-    return Column(
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [color.withOpacity(0.3), color.withOpacity(0.1)]),
-            shape: BoxShape.circle,
-            border: Border.all(color: color.withOpacity(0.4), width: 2),
-          ),
-          child: Icon(icon, size: 24, color: color),
-        ),
-        const SizedBox(height: 8),
-        Text(value, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: AppColors.greyText, fontSize: 11)),
-      ],
-    );
-  }
+  _StoryItem(this.title, this.icon, this.color, this.onTap);
 }
